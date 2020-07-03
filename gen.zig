@@ -12,17 +12,17 @@ fn GenOf(comptime T: type) type {
         allocator: *Allocator,
         value: ?T = null,
 
-        fn create(allocator: *Allocator, f: var) !*Self {
+        pub fn create(allocator: *Allocator, f: var) !*Self {
             var self = try allocator.create(Self);
             self.* = Self{ .allocator = allocator };
             _ = async f.@""(self);
             return self;
         }
-        fn deinit(self: *Self) void {
+        pub fn deinit(self: *Self) void {
             self.allocator.destroy(self);
         }
 
-        fn yield(self: *Self, value: T) void {
+        pub fn yield(self: *Self, value: T) void {
             self.value = value;
             suspend;
         }
@@ -31,10 +31,12 @@ fn GenOf(comptime T: type) type {
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 
-var called = false;
+var reached0 = false;
+var reached1 = false;
 fn nats(gen: var, n: u16) void {
-    called = true;
+    reached0 = true;
     gen.yield(0);
+    reached1 = true;
 }
 
 test "" {
@@ -45,5 +47,8 @@ test "" {
     });
     defer nrs.deinit();
 
-    assert(called);
+    assert(reached0);
+    assert(nrs.value.? == 0);
+
+    //assert(reached1);
 }
