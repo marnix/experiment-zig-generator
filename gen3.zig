@@ -24,11 +24,11 @@ fn GenOf(comptime T: type) type {
             };
         }
 
-        pub fn create(allocator: *Allocator, comptime f: anytype) !*Self {
+        pub fn create(allocator: *Allocator, comptime F: anytype) !*Self {
             var self = try allocator.create(Self);
-            const frame = try allocator.create(@Frame(f.@""));
+            const frame = try allocator.create(@Frame(F.@""));
             self.* = Self{ .allocator = allocator, .frame = frame };
-            frame.* = async f.@""(self);
+            frame.* = async F.@""(self);
             return self;
         }
         pub fn deinit(self: *Self) void {

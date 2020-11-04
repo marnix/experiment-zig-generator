@@ -5,30 +5,22 @@ const Allocator = std.mem.Allocator;
 // TODO list:
 //  - non-void return type
 
-fn GenOf(comptime T: type) type {
+fn GenOf(comptime T: type, comptime f: anytype) type {
     return struct {
         const Self = @This();
 
         allocator: *Allocator,
-        frame: anyframe, // *@Frame(_G().@""),
+        // frame: anyframe, // *@Frame(_G().@""),
         _value: ?T = null,
 
-        fn _F() type {
-            return @TypeOf(_G());
-        }
-        fn _G() type {
-            return struct {
-                fn @""(g: *Self) void {
-                    unreachable;
-                }
-            };
-        }
-
-        pub fn create(allocator: *Allocator, comptime f: anytype) !*Self {
+        pub fn create(allocator: *Allocator) !*Self {
             var self = try allocator.create(Self);
-            const frame = try allocator.create(@Frame(f.@""));
-            self.* = Self{ .allocator = allocator, .frame = frame };
-            frame.* = async f.@""(self);
+            //const frame = try allocator.create(@Frame(f.@""));
+            self.* = Self{
+                .allocator = allocator,
+                // .frame = frame
+            };
+            _ = async f.@""(self);
             return self;
         }
         pub fn deinit(self: *Self) void {
